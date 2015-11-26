@@ -155,7 +155,10 @@ class RAMLRouteParser extends YAMLParser with RouteParser {
           val p1 = parse(path, pref).get.parts
           l.map { r =>
             val p2 = r.path.parts
-            r.copy(path = PathPattern(p1 ++ p2))
+            (p1.last, p2.head) match {
+              case (d1: DynamicPart, d2: StaticPart) => r.copy(path = PathPattern((p1 :+ d2.copy("/" + d2.value)) ++ p2.tail))
+              case _ => r.copy(path = PathPattern(p1 ++ p2))
+            }
           }
       }.flatten.toSeq
     }
