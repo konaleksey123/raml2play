@@ -19,3 +19,14 @@
 
  - добавить в project/plugins.sbt строчку `addSbtPlugin("raiffeisen" % "elbrus-play" % "0.1.0-SNAPSHOT")`
  - убрать строчку `addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.3")`
+
+Для публикации артефакта в локальный Nexus надо выполнить команду sbt publish. Перед этим должны быть выполнены следующие условия:
+
+* у пользователя в Nexus должны быть права на публикацию артефактов 
+* в локальной папке USER_HOME/.sbt должен находиться файл .credentials следующего вида:
+```sh
+realm=Sonatype Nexus Repository Manager
+host=10.242.144.2
+user=%AD_USER%
+password=%AD_PASSWORD%
+```
