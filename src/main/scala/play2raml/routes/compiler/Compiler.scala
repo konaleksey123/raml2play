@@ -7,7 +7,7 @@ import play.api.PlayException
 import play.routes.compiler.RoutesCompiler.RoutesCompilerTask
 import play.routes.compiler.{RoutesCompilationError, RoutesGenerator}
 import play.sbt.routes.RoutesCompilationException
-import processor.RAMLRouteParser
+import processor.{RAMLRouteParserNew}
 import sbt.Logger
 
 import scala.io.Codec
@@ -22,7 +22,7 @@ object Compiler {
 
     val (products, errors) = {
       val results = tasks.map { task =>
-        compile(task, generator, generatedDir, "raml", new RAMLRouteParser(), log)
+        compile(task, generator, generatedDir, "raml", new RAMLRouteParserNew(), log)
       }
       val (lefts, rights) = results.partition(_.isLeft)
       val errors = lefts.flatMap { case Left(e) => e }

@@ -1,35 +1,4 @@
-#%RAML 1.0
-
-title: World Music API
-baseUri: http://example.api.com/{version}
-version: v1
-
-annotationTypes:
-  implementation:
-    allowMultiple: false
-    allowedTargets: [ Method ]
-
-/users/{id}:
+/user/{userId}:
   get:
     description: |
-      controllers.Clients.show(id: Long)
-      method get
-    responses:
-      200:
-        application/json:
-          type: User
-  put:
-   description: |
-    controllers.Clients.show(id: Long)
-   responses:
-      200:
-        body:
-          application/json:
-            example: |
-              {"data": "OLOLO1"}
-            schema: |
-              {"$schema":"http://json-schema.org/schema", "type":"object", "description":"A test", "properties":{ "data":{"type":"string"} }, "required":[ "data" ]}
-  /another/{id1}:
-    get:
-      description: |
-       controllers.Clients.show(id: Long, id1: Long)
+      @controllers.UserController.orgsAndBranches(userId: String)

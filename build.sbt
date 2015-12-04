@@ -4,7 +4,7 @@ name := "sbt-play2-raml"
 
 organization := "ru.raiffeisen.elbrus"
 
-version := "0.1.0-RELEASE"
+version := "0.1.1-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.4",
   "com.typesafe.play" % "routes-compiler_2.10" % "2.4.3" ,
   "com.typesafe.play" %% "play" % "2.4.3",
+  "org.raml" % "raml-parser" % "0.8.12",
   "org.scalatest" %% "scalatest" % "3.0.0-M11" % Test)
 
 publishMavenStyle := false

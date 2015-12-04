@@ -11,7 +11,7 @@ import play.routes.compiler._
  * @since 03.11.15
  */
 class RAMLRouteParserTest extends FunSuite with Assertions {
-  val parser = new RAMLRouteParser
+  val parser = new RAMLRouteParserNew
 
   val ethalon = List(
     Route(HttpVerb("GET"),
@@ -30,58 +30,6 @@ class RAMLRouteParserTest extends FunSuite with Assertions {
 
   )
 
-  test("test (implementation) annotations") {
-    val result = parser.parseRAML(
-      """#%RAML 1.0
-        |
-        |title: World Music API
-        |baseUri: http://example.api.com/{version}
-        |version: v1
-        |
-        |annotationTypes:
-        | implementation:
-        |  allowMultiple: false
-        |  allowedTargets: [ Method ]
-        |
-        |/users/{id}:
-        | get:
-        |  description: |
-        |   controllers.Clients.show(id: Long)
-        |   method get
-        |  responses:
-        |   200:
-        |    application/json:
-        |     type: User
-        |
-        | put:
-        |  description: |
-        |   controllers.Clients.show(id: Long)
-        |  responses:
-        |   200:
-        |     application/json:
-        |       type: User
-        |       body:
-        |         application/json:
-        |           example: |
-        |             {"data": "OLOLO1"}
-        |           schema: |
-        |             {"$schema":"http://json-schema.org/schema", "type":"object", "description":"A test", "properties":{ "data":{"type":"string"} }, "required":[ "data" ]}
-        | /another/{id1}:
-        |   get:
-        |     description: |
-        |      controllers.Clients.show(id: Long, id1: Long)
-        |""".stripMargin).get
-
-    assert(ethalon == result)
-  }
-
-  test("Parser must parse example 2") {
-    parser.parse(file("api2.raml")) match {
-      case Right(l) => assert(l == ethalon)
-      case Left(e) => fail(e.toString())
-    }
-  }
-
   test("Parser must parse example 1") {
     val ethalon = List(
       Route(HttpVerb("GET"),
@@ -90,7 +38,7 @@ class RAMLRouteParserTest extends FunSuite with Assertions {
 
       Route(HttpVerb("GET"),
         PathPattern(Seq(StaticPart("testService/"), StaticPart("testMethod"))),
-        HandlerCall("controllers", "Clients", false, "show1", None)),
+        HandlerCall("controllers", "Clients", false, "show1", None), List(Comment("Retrieve a test JSON"))),
 
       Route(HttpVerb("GET"),
         PathPattern(Seq(StaticPart("testService/"), StaticPart("testMethodWithParam/"), DynamicPart("param", "[^/]+", true))),
@@ -103,28 +51,14 @@ class RAMLRouteParserTest extends FunSuite with Assertions {
     }
   }
 
-  test("Parser must parse example 3") {
+  test("Parser must parse example 2") {
     val ethalon = List(
       Route(HttpVerb("GET"),
         PathPattern(Seq(StaticPart("user/"), DynamicPart("userId", "[^/]+", true))),
         HandlerCall("controllers", "UserController", true, "orgsAndBranches", Some(Seq(Parameter("userId", "String", None, None)))))
     )
 
-    parser.parse(file("api3.raml")) match {
-      case Right(l) =>
-        assert(l == ethalon)
-      case Left(e) => fail(e.toString())
-    }
-  }
-
-  test("Parser must parse example 4") {
-    val ethalon = List(
-      Route(HttpVerb("GET"),
-        PathPattern(Seq(StaticPart("user/"), DynamicPart("userId", "[^/]+", true), StaticPart("/messages"))),
-        HandlerCall("controllers", "UserController", true, "orgsAndBranches", Some(Seq(Parameter("userId", "String", None, None)))))
-    )
-
-    parser.parse(file("api4.raml")) match {
+    parser.parse(file("api2.raml")) match {
       case Right(l) =>
         assert(l == ethalon)
       case Left(e) => fail(e.toString())
