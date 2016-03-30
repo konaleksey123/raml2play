@@ -11,7 +11,7 @@ import play.routes.compiler._
  * @since 03.11.15
  */
 class RAMLRouteParserTest extends FunSuite with Assertions {
-  val parser = new RAMLRouteParserNew
+  val parser = new RAMLRouteParser
 
   val ethalon = List(
     Route(HttpVerb("GET"),
@@ -62,6 +62,13 @@ class RAMLRouteParserTest extends FunSuite with Assertions {
       case Right(l) =>
         assert(l == ethalon)
       case Left(e) => fail(e.toString())
+    }
+  }
+
+  test("Parser must parse example 3") {
+    parser.parse(file("api3.raml")) match {
+      case Right(l) => fail(l.toString())
+      case _ => succeed
     }
   }
 

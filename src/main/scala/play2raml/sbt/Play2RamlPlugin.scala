@@ -66,7 +66,7 @@ object Play2RamlPlugin extends AutoPlugin {
       },
     doc <<= (doc in Compile) map { f =>
       val fl = s"${f.getAbsolutePath}/api.html"
-      s"raml2html conf/api.raml -o ${fl}" !
+      s"raml2html conf/api.raml -o $fl" !
 
       new java.io.File(fl)
     }
