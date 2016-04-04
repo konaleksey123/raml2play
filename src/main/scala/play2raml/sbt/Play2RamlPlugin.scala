@@ -8,7 +8,6 @@ import play.sbt.PlayScala
 import play.sbt.routes.{RoutesCompiler, _}
 import sbt.Keys._
 import sbt._
-import play.twirl.sbt.Import.TwirlKeys
 
 import scala.language.postfixOps
 

@@ -1,0 +1,49 @@
+#%RAML 0.8
+
+title: Test API
+baseUri: http://127.0.0.1:9000/
+version: v1
+
+/test/{id}:
+  uriParameters:
+    id:
+      description: Some id
+      type: string
+      default: "ololo"
+  get:
+    queryParameters:
+      param1:
+        type: string
+      param2:
+        type: number
+      param3:
+        type: integer
+      param4:
+        type: date
+      param5:
+        type: boolean
+      param6:
+        type: string
+        enum: ['option1', 'option2', 'option3']
+      param7:
+        type: string
+        pattern: "test*."
+      param8:
+        type: string
+        minLength: 1
+        maxLength: 10
+      param9:
+        type: integer
+        minimum: 1
+        maximum: 10
+      param10:
+        type: date
+        repeat: true
+      param11:
+        type: date
+        required: true
+      param12:
+        type: integer
+        default: 1
+    description: |
+      @controllers.testController.test(id, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12)
