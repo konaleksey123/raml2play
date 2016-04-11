@@ -12,6 +12,6 @@
 Для использования в проекте нужно:
 
  - добавить в project/plugins.sbt строчку `addSbtPlugin("bavadim" % "raml2play" % "0.0.1-SNAPSHOT")`
+ - добавить в project/plugins.sbt строчку `resolvers += Resolver.url("bavadim", url("https://dl.bintray.com/bavadim/sbt-raml-plugins"))(Resolver.ivyStylePatterns)`
  - можно (но не обязательно) убрать строчку `addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.3")`
  - в `build.sbt` добавить `enablePlugins(Raml2PlayPlugin)`
-
