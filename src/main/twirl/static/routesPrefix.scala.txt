@@ -1,0 +1,80 @@
+@import raml2play.TemplateHelpers._
+@import raml2play.model._
+@(sourceInfo: RoutesSourceInfo, pkg: Option[String], useInjector: Rule => Boolean)
+// @@GENERATOR:raml2play
+// @@SOURCE:@sourceInfo.source
+// @@DATE:@sourceInfo.date
+
+import java.time.ZonedDateTime
+import play.api.mvc.PathBindable
+import play.api.mvc.QueryStringBindable
+import scala.util.Try
+
+@* Can't put in the root package because Java can't refer to the root package *@
+package @pkg.getOrElse("_routes_") @ob
+  object RoutesPrefix @ob
+    private var _prefix: String = "/"
+    def setPrefix(p: String): Unit = @ob
+      _prefix = p
+    @cb
+    def prefix: String = _prefix
+    val byNamePrefix: Function0[String] = @ob () => prefix @cb
+  @cb
+
+  object Bindables @ob
+      implicit def timePathBindable = new PathBindable[ZonedDateTime] @ob
+        def bind(key: String, value: String): Either[String, ZonedDateTime] =
+          Try(Right(ZonedDateTime.parse(value))).getOrElse(Left("Bad time format"))
+
+        def unbind(key: String, article: ZonedDateTime): String = article.toString
+      @cb
+
+      implicit def timeQueryBindable = new QueryStringBindable[ZonedDateTime] @ob
+        def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, ZonedDateTime]] =
+          params.get(key).map @ob s =>
+            if (s.length > 1) Left("Not a list")
+            else if (s.isEmpty) Left("Parameter not present")
+            else Try(Right(ZonedDateTime.parse(s.head))).getOrElse(Left("Bad time format"))
+          @cb
+        def unbind(key: String, value: ZonedDateTime) = value.toString
+      @cb
+
+      implicit def bigDecimalPathBindable = new PathBindable[BigDecimal] @ob
+        def bind(key: String, value: String): Either[String, BigDecimal] =
+          Try(Right(BigDecimal(value))).getOrElse(Left("Bad decimal format"))
+
+        def unbind(key: String, value: BigDecimal): String = value.toString()
+      @cb
+
+      implicit def bigDecimalQueryBindable = new QueryStringBindable[BigDecimal] @ob
+        def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, BigDecimal]] =
+          params.get(key).map @ob s =>
+            if (s.length > 1) Left("Not a list")
+            else if (s.isEmpty) Left("Parameter not present")
+            else Try(Right(BigDecimal(s.head))).getOrElse(Left("Bad decimal format"))
+          @cb
+        def unbind(key: String, value: BigDecimal) = value.toString()
+      @cb
+
+      implicit def bigIntPathBindable = new PathBindable[BigInt] @ob
+        def bind(key: String, value: String): Either[String, BigInt] =
+          Try(Right(BigInt(value))).getOrElse(Left("Bad integer format"))
+
+        def unbind(key: String, value: BigInt): String = value.toString()
+      @cb
+
+      implicit def bigIntQueryBindable = new QueryStringBindable[BigInt] @ob
+        def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, BigInt]] =
+          params.get(key).map @ob s =>
+            if (s.length > 1) Left("Not a list")
+            else if (s.isEmpty) Left("Parameter not present")
+            else Try(Right(BigInt(s.head))).getOrElse(Left("Bad integer format"))
+          @cb
+        def unbind(key: String, value: BigInt) = value.toString()
+      @cb
+
+  @cb
+
+@cb
+
+

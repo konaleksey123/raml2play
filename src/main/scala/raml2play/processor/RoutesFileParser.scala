@@ -1,11 +1,12 @@
-package processor.routes_file_parser
+package raml2play.processor
 
 import java.io.{File, FileInputStream}
-import java.time.format.DateTimeFormatter
+import java.time.ZonedDateTime
 
 import org.raml.model._
 import org.raml.model.parameter.AbstractParam
 import org.raml.parser.visitor.RamlDocumentBuilder
+import raml2play.model._
 
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -15,14 +16,14 @@ import scala.util.Try
  * @since 01.04.16
  */
 object RoutesFileParser {
-  def parseFile(ramlF: File): Try[Seq[Rule]] =
+  def parseFile(ramlF: File): Try[List[Rule]] =
     Try(new RamlDocumentBuilder().build(new FileInputStream(ramlF), ramlF.getPath)).map(parse)
 
-  private def parse(raml: Raml): Seq[Rule] = raml.getResources.flatMap { case (firstPartOfName, r) =>
-    traverseToDeep(r, Seq() /*TODO*/, Seq())
-  }.toSeq
+  private def parse(raml: Raml): List[Rule] = raml.getResources.flatMap { case (firstPartOfName, r) =>
+    traverseToDeep(r, List() /*TODO*/, List())
+  }.toList
 
-  private def traverseToDeep(root: Resource, argumentsFromURI: Seq[Argument], acc: Seq[Rule]): Seq[Rule] = {
+  private def traverseToDeep(root: Resource, argumentsFromURI: List[Parameter], acc: List[Rule]): List[Rule] = {
     val newArgumentsFromURI = argumentsFromURIParams(root) ++ argumentsFromURI
     val allMethods = methodsFromResource(root, newArgumentsFromURI) ++ acc
 
@@ -34,50 +35,50 @@ object RoutesFileParser {
     }
   }
 
-  private def argumentsFromURIParams(root: Resource): Seq[Argument] =
-    if (root.getUriParameters == null) Seq() else {
+  private def argumentsFromURIParams(root: Resource): List[Parameter] =
+    if (root.getUriParameters == null) List() else {
       root.getUriParameters.map {
-        case (name, param) if param.getType != null => parseArgument(name, param)
-      }.toSeq.collect { case Some(param) => param }
+        case (name, param) if param.getType != null => parseArgument(name, param, true)
+      }.toList.collect { case Some(param) => param }
     }
 
-  private def parseArgument(name: String, param: AbstractParam): Option[Argument] = {
+  private def parseArgument(name: String, param: AbstractParam, isUriParam: Boolean): Option[Parameter] = {
     val typeO = Option(param.getType)
-    val isRepeated = param.isRepeat
-    val isRequired = param.isRequired
+    val isRepeated = if (isUriParam) false else param.isRepeat
+    val isRequired = if (isUriParam) true else param.isRequired
     val defaultO = Option(param.getDefaultValue)
 
     typeO.collect {
       case ParamType.STRING =>
         val enumO = Option(param.getEnumeration).map(_.toList)
-        val patternO = Option(param.getPattern)
+        val patternO = Option(param.getPattern).map(_.r)
         val minLenO = Option(param.getMinLength).map(_.toInt)
         val maxLenO = Option(param.getMaxLength).map(_.toInt)
-        StringArgument(name, isRepeated, isRequired, defaultO, patternO, enumO, minLenO, maxLenO)
+        StringParameter(name, isRepeated, isRequired, defaultO, patternO, enumO, minLenO, maxLenO)
       case ParamType.BOOLEAN =>
-        val default = defaultO.flatMap(v => Try(v.toBoolean).map(Some(_)).getOrElse(None))
-        BooleanArgument(name, isRepeated, isRequired, default)
+        val default = defaultO.flatMap(v => Try(v.toBoolean.toString).map(Some(_)).getOrElse(None))
+        BooleanParameter(name, isRepeated, isRequired, default)
       case ParamType.DATE =>
         //ISO instead RFC2616
         val default = defaultO.flatMap { v =>
-          Try(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(v)).map(Some(_)).getOrElse(None)
+          Try(ZonedDateTime.parse(v)).map(d => Some(d.toString)).getOrElse(None)
         }
-        DateArgument(name, isRepeated, isRequired, default)
+        DateParameter(name, isRepeated, isRequired, default)
       case ParamType.INTEGER =>
-        val default = defaultO.flatMap(v => Try(BigInt(v)).map(Some(_)).getOrElse(None))
+        val default = defaultO.flatMap(v => Try(BigInt(v)).map(d => Some(d.toString())).getOrElse(None))
         val min = Option(param.getMinimum).map(v => BigInt(v.toBigInteger))
         val max = Option(param.getMaximum).map(v => BigInt(v.toBigInteger))
-        IntegerArgument(name, isRepeated, isRequired, default, min, max)
+        IntegerParameter(name, isRepeated, isRequired, default, min, max)
       case ParamType.NUMBER =>
-        val default = defaultO.flatMap(v => Try(BigDecimal(v)).map(Some(_)).getOrElse(None))
+        val default = defaultO.flatMap(v => Try(BigDecimal(v)).map(d => Some(d.toString())).getOrElse(None))
         val min = Option(param.getMinimum).map(v => BigDecimal(v.toBigInteger))
         val max = Option(param.getMaximum).map(v => BigDecimal(v.toBigInteger))
-        NumberArgument(name, isRepeated, isRequired, default, min, max)
+        NumberParameter(name, isRepeated, isRequired, default, min, max)
     }
   }
 
-  private def methodsFromResource(r: org.raml.model.Resource, argsFromURI: Seq[Argument]): Seq[Rule] =
-    if (r.getActions == null) Seq()
+  private def methodsFromResource(r: org.raml.model.Resource, argsFromURI: List[Parameter]): List[Rule] =
+    if (r.getActions == null) List()
     else r.getActions.collect {
       case (ActionType.DELETE, action) if action != null && action.getDescription != null =>
         method(action.getDescription, "delete", r.getUri, argumentsFromAction(action) ++ argsFromURI)
@@ -95,11 +96,11 @@ object RoutesFileParser {
         method(action.getDescription, "put", r.getUri, argumentsFromAction(action) ++ argsFromURI)
       case (ActionType.TRACE, action) if action != null && action.getDescription != null =>
         method(action.getDescription, "trace", r.getUri, argumentsFromAction(action) ++ argsFromURI)
-    }.toSeq.collect { case Some(m) => m }
+    }.toList.collect { case Some(m) => m }
 
-  private def argumentsFromAction(a: Action): Seq[Argument] =
-    a.getQueryParameters.collect { case (name, param) => parseArgument(name, param) }.toSeq.collect { case Some(a) => a }
+  private def argumentsFromAction(a: Action): List[Parameter] =
+    a.getQueryParameters.collect { case (name, param) => parseArgument(name, param, false) }.toList.collect { case Some(a) => a }
 
-  private def method(desc: String, verb: String, uri: String, args: Seq[Argument]): Option[Rule] =
-    ImplRefParser.parse(desc, verb, uri, args).map(Some(_)).getOrElse(None)
+  private def method(desc: String, verb: String, uri: String, args: List[Parameter]): Option[Rule] =
+    RefParser.parse(desc, verb, uri, args).map(Some(_)).getOrElse(None)
 }
