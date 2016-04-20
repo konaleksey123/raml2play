@@ -1,17 +1,23 @@
-# Elbrus-play плагин
+# raml2play
 
-Особенности:
+raml2play is a sbt plugin for [play framework](https://www.playframework.com/) 2.4, 
+which replaces the default routes definition syntax used in conf/routes with [RAML](http://raml.org) 0.8. 
+This plugin inspired by [sbt-play-raml](https://github.com/scalableminds/sbt-play-raml).
 
- - определять роуты в RAML формате, достаточно в conf создать файл *.raml (ссылка на реализацию - превоя строка в description, 
-см. тесты для примера)
-- поддерживаются все типы и ограничения из RAML 0.8
-- даты в формате ISO, а не RFC!
+## Usage
 
-## Использование
+- add the following lines to your sbt plugins file project/plugins.sbt:
 
-Для использования в проекте нужно:
+        addSbtPlugin("bavadim" % "raml2play" % "0.0.1")
+        resolvers += Resolver.url("bavadim", url("https://dl.bintray.com/bavadim/sbt-raml-plugins"))(Resolver.ivyStylePatterns)
 
- - добавить в project/plugins.sbt строчку `addSbtPlugin("bavadim" % "raml2play" % "0.0.1-SNAPSHOT")`
- - добавить в project/plugins.sbt строчку `resolvers += Resolver.url("bavadim", url("https://dl.bintray.com/bavadim/sbt-raml-plugins"))(Resolver.ivyStylePatterns)`
- - можно (но не обязательно) убрать строчку `addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.3")`
- - в `build.sbt` добавить `enablePlugins(Raml2PlayPlugin)`
+- create your RAML routes file in conf/api.raml 
+- add controller reference in first row of HTTP method description:
+
+        /:
+          get:
+            description: |
+              @controllers.Application.index
+
+
+
