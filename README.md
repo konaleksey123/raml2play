@@ -1,6 +1,6 @@
-# raml2play
+# play2raml
 
-raml2play is a sbt plugin for [play framework](https://www.playframework.com/) 2.4, 
+play2raml is a sbt plugin for [play framework](https://www.playframework.com/) 2.4, 
 which replaces the default routes definition syntax used in conf/routes with [RAML](http://raml.org) 0.8. 
 This plugin inspired by [sbt-play-raml](https://github.com/scalableminds/sbt-play-raml).
 
