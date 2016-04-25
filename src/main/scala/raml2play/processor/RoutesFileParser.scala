@@ -5,6 +5,7 @@ import java.time.ZonedDateTime
 
 import org.raml.model._
 import org.raml.model.parameter.AbstractParam
+import org.raml.parser.loader.FileResourceLoader
 import org.raml.parser.visitor.RamlDocumentBuilder
 import raml2play.model._
 
@@ -17,10 +18,16 @@ import scala.util.Try
  */
 object RoutesFileParser {
   def parseFile(ramlF: File): Try[List[Rule]] =
-    Try(new RamlDocumentBuilder().build(new FileInputStream(ramlF), ramlF.getPath)).map(parse)
+    Try(
+      if (System.getProperty("os.name").startsWith("""Windows""")) {
+        new RamlDocumentBuilder(new FileResourceLoader(ramlF.getParentFile.getAbsolutePath)).build(new FileInputStream(ramlF), ramlF.getPath)
+      } else {
+        new RamlDocumentBuilder(new FileResourceLoader("")).build(new FileInputStream(ramlF), ramlF.getPath)
+      }
+    ).map(parse)
 
   private def parse(raml: Raml): List[Rule] = raml.getResources.flatMap { case (firstPartOfName, r) =>
-    traverseToDeep(r, List() /*TODO*/, List())
+    traverseToDeep(r, List() /*TODO root defenitions*/, List())
   }.toList
 
   private def traverseToDeep(root: Resource, argumentsFromURI: List[Parameter], acc: List[Rule]): List[Rule] = {

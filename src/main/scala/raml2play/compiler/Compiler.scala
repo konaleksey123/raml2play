@@ -41,8 +41,6 @@ object Compiler {
 
   def compile(task: RoutesCompilerTask, generatedDir: File,
               fileExtension: String, log: Logger): Either[Seq[RoutesCompilationError], Seq[File]] = {
-    //val namespace = Option(task.file.getName).filter(_.endsWith("." + fileExtension)).map(
-    //  _.dropRight(("." + fileExtension).length))
     val namespace = Some("router")
 
     val routeFile = task.file.getAbsoluteFile
