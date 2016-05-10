@@ -17,7 +17,7 @@ lazy val root = (project in file(".")).
     repository in bintray := "sbt-raml-plugins",
     bintrayOrganization in bintray := None,
     libraryDependencies ++= Seq(
-      "org.raml" % "raml-parser" % "0.8.12" exclude("org.slf4j", "slf4j-log4j12"),
+      "org.raml" % "raml-parser" % "0.8.12",
       "org.scalatest" %% "scalatest" % "3.0.0-M12" % Test),
     addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.1")
   ).enablePlugins(SbtTwirl)
