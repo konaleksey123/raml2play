@@ -27,17 +27,17 @@ object RoutesFileParser {
     ).map(parse)
 
   private def parse(raml: Raml): List[Rule] = raml.getResources.flatMap { case (firstPartOfName, r) =>
-    traverseToDeep(r, List() /*TODO root defenitions*/, List())
+    traverseToDeep(r, List() /*TODO root defenitions*/)
   }.toList
 
-  private def traverseToDeep(root: Resource, argumentsFromURI: List[Parameter], acc: List[Rule]): List[Rule] = {
+  private def traverseToDeep(root: Resource, argumentsFromURI: List[Parameter]): List[Rule] = {
     val newArgumentsFromURI = argumentsFromURIParams(root) ++ argumentsFromURI
-    val allMethods = methodsFromResource(root, newArgumentsFromURI) ++ acc
+    val allMethods = methodsFromResource(root, newArgumentsFromURI)
 
     if (root.getResources == null || root.getResources.isEmpty) allMethods
     else {
-      root.getResources.map {
-        case (partOfName, rawResource) => traverseToDeep(rawResource, newArgumentsFromURI, allMethods)
+      allMethods ++ root.getResources.map {
+        case (partOfName, rawResource) => traverseToDeep(rawResource, newArgumentsFromURI)
       }.reduce((a, b) => a ++ b)
     }
   }
